@@ -13,8 +13,7 @@ use iced::{
         widget::{tree, Tree},
         Clipboard, Layout, Shell, Widget,
     },
-    alignment::{Horizontal, Vertical},
-    event,
+    alignment::Vertical,
     mouse::{self, Cursor},
     widget::{
         container, scrollable,

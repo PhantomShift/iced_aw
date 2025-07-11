@@ -9,7 +9,6 @@ use iced::{
         },
         Clipboard, Layout, Shell, Widget,
     },
-    event::Status,
     mouse::Cursor,
     time::{Duration, Instant},
     window, Border, Color, Element, Event, Length, Rectangle, Shadow, Size, Vector,

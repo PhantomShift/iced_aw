@@ -446,11 +446,7 @@ where
     }
 
     /// The event handling for the keyboard input.
-    fn on_event_keyboard(
-        &mut self,
-        event: &Event,
-        shell: &mut Shell<'_, Message>,
-    ) -> event::Status {
+    fn on_event_keyboard(&mut self, event: &Event) -> event::Status {
         if self.state.focus == Focus::None {
             return event::Status::Ignored;
         }
@@ -619,7 +615,7 @@ where
         clipboard: &mut dyn Clipboard,
         shell: &mut Shell<Message>,
     ) {
-        if event::Status::Captured == self.on_event_keyboard(event, shell) {
+        if event::Status::Captured == self.on_event_keyboard(event) {
             return;
         }
 

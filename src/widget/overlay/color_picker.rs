@@ -29,8 +29,8 @@ use iced::{
         text::{self, Wrapping},
         Button, Column, Row,
     },
-    Alignment, Border, Color, Element, Event, Length, Padding, Pixels, Point, Rectangle, Renderer,
-    Shadow, Size, Vector,
+    Border, Color, Element, Event, Length, Padding, Pixels, Point, Rectangle, Renderer, Shadow,
+    Size, Vector,
 };
 // use iced_fonts::{
 //     required::{icon_to_string, RequiredIcons},
@@ -415,11 +415,7 @@ where
     }
 
     /// The even handling for the keyboard input.
-    fn on_event_keyboard(
-        &mut self,
-        event: &Event,
-        shell: &mut Shell<'_, Message>,
-    ) -> event::Status {
+    fn on_event_keyboard(&mut self, event: &Event) -> event::Status {
         if self.state.focus == Focus::None {
             return event::Status::Ignored;
         }
@@ -629,7 +625,7 @@ where
         clipboard: &mut dyn Clipboard,
         shell: &mut Shell<Message>,
     ) {
-        if event::Status::Captured == self.on_event_keyboard(event, shell) {
+        if event::Status::Captured == self.on_event_keyboard(event) {
             self.clear_cache();
             return;
         }

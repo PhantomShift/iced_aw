@@ -9,7 +9,6 @@ use iced::{
         widget::{Operation, Tree},
         Clipboard, Layout, Shell, Widget,
     },
-    event,
     keyboard::{self, key::Named},
     mouse::{self, Cursor},
     touch, Element, Event, Length, Point, Rectangle, Size, Vector,

@@ -12,8 +12,7 @@ use iced::{
         mouse, overlay, renderer,
         widget::{Operation, Tree},
         Clipboard, Layout, Shell,
-    },
-    event, Event, Point, Rectangle, Size, Vector,
+    }, Event, Point, Rectangle, Size, Vector,
 };
 
 use super::{common::*, menu_bar::MenuBarState, menu_tree::*};
@@ -189,7 +188,7 @@ where
         clipboard: &mut dyn Clipboard,
         shell: &mut Shell<'_, Message>,
     ) {
-        use event::Status::*;
+        
 
         let viewport = layout.bounds();
         let mut lc = layout.children();

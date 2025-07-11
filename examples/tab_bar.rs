@@ -4,8 +4,7 @@
 
 use iced::{
     alignment::Vertical,
-    widget::{Button, Column, Row, Text, TextInput},
-    Alignment, Element, Length,
+    widget::{Button, Column, Row, Text, TextInput}, Element, Length,
 };
 use iced_aw::{TabBar, TabLabel};
 

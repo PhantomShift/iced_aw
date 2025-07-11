@@ -22,8 +22,7 @@ use iced::{
         },
         Clipboard, Layout, Shell, Widget,
     },
-    alignment::{self, Horizontal, Vertical},
-    event,
+    alignment::{self, Vertical},
     mouse::{self, Cursor},
     touch,
     widget::{

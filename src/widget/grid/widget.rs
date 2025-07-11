@@ -6,8 +6,7 @@ use iced::{
         renderer::Style,
         widget::{Operation, Tree},
         Clipboard, Layout, Shell, Widget,
-    },
-    event, mouse, overlay, Element, Event, Length, Rectangle, Size, Vector,
+    }, mouse, overlay, Element, Event, Length, Rectangle, Size, Vector,
 };
 
 use super::{layout::layout, types::Grid};

@@ -27,7 +27,6 @@ use iced::{
         },
         Clipboard, Layout, Shell, Widget,
     },
-    event,
     mouse::{self, Cursor},
     widget::{text, Row},
     Element, Event, Font, Length, Padding, Pixels, Point, Rectangle, Size, Vector,
