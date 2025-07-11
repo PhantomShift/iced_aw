@@ -6,7 +6,8 @@ use iced::{
         renderer::Style,
         widget::{Operation, Tree},
         Clipboard, Layout, Shell, Widget,
-    }, mouse, overlay, Element, Event, Length, Rectangle, Size, Vector,
+    },
+    mouse, overlay, Element, Event, Length, Rectangle, Size, Vector,
 };
 
 use super::{layout::layout, types::Grid};
@@ -121,7 +122,7 @@ where
             .for_each(|((child, state), layout)| {
                 child.as_widget_mut().update(
                     state, event, layout, cursor, renderer, clipboard, shell, viewport,
-                )
+                );
             });
     }
 

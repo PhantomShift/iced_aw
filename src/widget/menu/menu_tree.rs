@@ -333,7 +333,7 @@ where
             .zip(slice_layout.children()) // [item_layout...]
             .for_each(|((item, tree), layout)| {
                 item.on_event(
-                    tree, &event, layout, cursor, renderer, clipboard, shell, viewport,
+                    tree, event, layout, cursor, renderer, clipboard, shell, viewport,
                 )
             });
 

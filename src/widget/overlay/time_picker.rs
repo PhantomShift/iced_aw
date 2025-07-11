@@ -247,7 +247,7 @@ where
                     shell.capture_event();
                 }
                 _ => (),
-            };
+            }
 
             match self.state.clock_dragged {
                 ClockDragged::Hour => {
@@ -297,7 +297,7 @@ where
                     shell.capture_event();
                 }
                 ClockDragged::None => (),
-            };
+            }
         } else {
             match event {
                 Event::Mouse(mouse::Event::ButtonReleased(mouse::Button::Left))

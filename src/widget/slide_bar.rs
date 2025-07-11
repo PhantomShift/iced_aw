@@ -176,7 +176,7 @@ where
         _viewport: &Rectangle,
     ) {
         update(
-            &event,
+            event,
             layout,
             cursor,
             shell,

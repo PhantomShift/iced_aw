@@ -338,8 +338,8 @@ where
             .for_each(|((child, state), layout)| {
                 child.as_widget_mut().update(
                     state, event, layout, cursor, renderer, clipboard, shell, viewport,
-                )
-            })
+                );
+            });
     }
 
     fn mouse_interaction(

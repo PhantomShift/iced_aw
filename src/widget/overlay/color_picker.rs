@@ -651,7 +651,7 @@ where
         let rgba_color_layout = block2_children
             .next()
             .expect("widget: Layout should have a RGBA color layout");
-        let rgba_color_status = self.on_event_rgba_color(&event, rgba_color_layout, cursor);
+        let rgba_color_status = self.on_event_rgba_color(event, rgba_color_layout, cursor);
 
         let mut fake_messages: Vec<Message> = Vec::new();
 

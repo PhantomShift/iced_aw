@@ -558,7 +558,7 @@ where
                                     |on_close| (on_close)(self.tab_indices[new_selected].clone()),
                                 ),
                         );
-                        return shell.capture_event();
+                        shell.capture_event();
                     }
                 }
             }
@@ -719,7 +719,7 @@ fn draw_tab<Theme, Renderer>(
                 let text_bounds = text_bound_rectangle(label_layout_children.next());
                 renderer.fill_text(
                     iced::advanced::text::Text {
-                        content: text.to_string(),
+                        content: text.to_owned(),
                         bounds: Size::new(text_bounds.width, text_bounds.height),
                         size: Pixels(text_data.1),
                         font: text_data.0,
@@ -765,7 +765,7 @@ fn draw_tab<Theme, Renderer>(
                 );
                 renderer.fill_text(
                     iced::advanced::text::Text {
-                        content: text.to_string(),
+                        content: text.to_owned(),
                         bounds: Size::new(text_bounds.width, text_bounds.height),
                         size: Pixels(text_data.1),
                         font: text_data.0,
@@ -780,7 +780,7 @@ fn draw_tab<Theme, Renderer>(
                     text_bounds,
                 );
             }
-        };
+        }
     }
 
     fn render_close<Renderer>(
@@ -1343,7 +1343,7 @@ where
                 clipboard,
                 shell,
                 viewport,
-            )
+            );
         });
     }
 

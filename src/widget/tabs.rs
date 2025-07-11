@@ -429,7 +429,7 @@ where
 
         self.tab_bar.update(
             &mut Tree::empty(),
-            &event,
+            event,
             tab_bar_layout,
             cursor,
             renderer,
@@ -441,14 +441,14 @@ where
         self.tabs.get_mut(idx).iter_mut().for_each(|element| {
             element.as_widget_mut().update(
                 &mut state.children[1].children[idx],
-                &event,
+                event,
                 tab_content_layout,
                 cursor,
                 renderer,
                 clipboard,
                 shell,
                 viewport,
-            )
+            );
         });
     }
 
@@ -590,7 +590,7 @@ where
                         &mut state.children[1].children[idx],
                         layout,
                         renderer,
-                        &viewport,
+                        viewport,
                         translation,
                     )
                 })

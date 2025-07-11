@@ -197,7 +197,7 @@ where
             .for_each(|((item, tree), layout)| {
                 item.on_event(
                     tree, event, layout, cursor, renderer, clipboard, shell, viewport,
-                )
+                );
             });
 
         let bar = tree.state.downcast_mut::<MenuBarState>();

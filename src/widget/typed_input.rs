@@ -436,7 +436,7 @@ where
                                 shell.publish(on_change(value));
                             }
                         }
-                    };
+                    }
                     shell.invalidate_layout();
                 }
                 InternalMessage::OnSubmit => {
@@ -446,7 +446,7 @@ where
                             Err(_) => Err(self.text.clone()),
                         };
                         shell.publish(on_submit(value));
-                    };
+                    }
                     shell.invalidate_layout();
                 }
                 InternalMessage::OnPaste(value) => {
@@ -459,7 +459,7 @@ where
                                 shell.publish(on_paste(value));
                             }
                         }
-                    };
+                    }
                     shell.invalidate_layout();
                 }
             }

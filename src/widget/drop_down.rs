@@ -168,7 +168,7 @@ where
             clipboard,
             shell,
             viewport,
-        )
+        );
     }
 
     fn mouse_interaction(
@@ -437,7 +437,7 @@ where
             clipboard,
             shell,
             &layout.bounds(),
-        )
+        );
     }
 
     fn mouse_interaction(
