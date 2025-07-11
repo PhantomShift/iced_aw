@@ -32,10 +32,11 @@ use iced::{
     Alignment, Border, Color, Element, Event, Length, Padding, Pixels, Point, Rectangle, Renderer,
     Shadow, Size, Vector,
 };
-use iced_fonts::{
-    required::{icon_to_string, RequiredIcons},
-    REQUIRED_FONT,
-};
+// use iced_fonts::{
+//     required::{icon_to_string, RequiredIcons},
+//     REQUIRED_FONT,
+// };
+use crate::temp_fonts::{Icons, REQUIRED_FONT};
 use std::collections::HashMap;
 
 /// The padding around the elements.
@@ -99,7 +100,7 @@ where
         ColorPickerOverlay {
             state: overlay_state,
             cancel_button: Button::new(
-                iced::widget::Text::new(icon_to_string(RequiredIcons::X))
+                iced::widget::Text::new(Icons::X.to_codepoint_string())
                     .align_x(Horizontal::Center)
                     .width(Length::Fill)
                     .font(REQUIRED_FONT),
@@ -107,7 +108,7 @@ where
             .width(Length::Fill)
             .on_press(on_cancel.clone()),
             submit_button: Button::new(
-                iced::widget::Text::new(icon_to_string(RequiredIcons::Check))
+                iced::widget::Text::new(Icons::Check.to_codepoint_string())
                     .align_x(Horizontal::Center)
                     .width(Length::Fill)
                     .font(REQUIRED_FONT),
@@ -414,7 +415,11 @@ where
     }
 
     /// The even handling for the keyboard input.
-    fn on_event_keyboard(&mut self, event: &Event) -> event::Status {
+    fn on_event_keyboard(
+        &mut self,
+        event: &Event,
+        shell: &mut Shell<'_, Message>,
+    ) -> event::Status {
         if self.state.focus == Focus::None {
             return event::Status::Ignored;
         }
@@ -615,18 +620,18 @@ where
         node
     }
 
-    fn on_event(
+    fn update(
         &mut self,
-        event: Event,
+        event: &Event,
         layout: Layout<'_>,
         cursor: Cursor,
         renderer: &Renderer,
         clipboard: &mut dyn Clipboard,
         shell: &mut Shell<Message>,
-    ) -> event::Status {
-        if event::Status::Captured == self.on_event_keyboard(&event) {
+    ) {
+        if event::Status::Captured == self.on_event_keyboard(event, shell) {
             self.clear_cache();
-            return event::Status::Captured;
+            return;
         }
 
         let mut children = layout.children();
@@ -637,7 +642,7 @@ where
         let block1_layout = children
             .next()
             .expect("widget: Layout should have a 1. block layout");
-        let hsv_color_status = self.on_event_hsv_color(&event, block1_layout, cursor);
+        let hsv_color_status = self.on_event_hsv_color(event, block1_layout, cursor);
         // ----------- Block 1 end ------------------
 
         // ----------- Block 2 ----------------------
@@ -663,9 +668,9 @@ where
         let cancel_button_layout = block2_children
             .next()
             .expect("widget: Layout should have a cancel button layout for a ColorPicker");
-        let cancel_button_status = self.cancel_button.on_event(
+        self.cancel_button.update(
             &mut self.tree.children[0],
-            event.clone(),
+            event,
             cancel_button_layout,
             cursor,
             renderer,
@@ -677,7 +682,7 @@ where
         let submit_button_layout = block2_children
             .next()
             .expect("widget: Layout should have a submit button layout for a ColorPicker");
-        let submit_button_status = self.submit_button.on_event(
+        self.submit_button.update(
             &mut self.tree.children[1],
             event,
             submit_button_layout,
@@ -699,18 +704,17 @@ where
             self.clear_cache();
         }
 
-        status
-            .merge(hsv_color_status)
-            .merge(rgba_color_status)
-            .merge(cancel_button_status)
-            .merge(submit_button_status)
+        if event::Status::Captured == status.merge(hsv_color_status).merge(rgba_color_status) {
+            shell.capture_event();
+            // Similar issue to time picker and date picker
+            shell.request_redraw();
+        }
     }
 
     fn mouse_interaction(
         &self,
         layout: Layout<'_>,
         cursor: Cursor,
-        viewport: &Rectangle,
         renderer: &Renderer,
     ) -> mouse::Interaction {
         let mut children = layout.children();
@@ -790,7 +794,7 @@ where
             &self.tree.children[1],
             cancel_button_layout,
             cursor,
-            viewport,
+            &Rectangle::INFINITE,
             renderer,
         );
 
@@ -801,7 +805,7 @@ where
             &self.tree.children[1],
             submit_button_layout,
             cursor,
-            viewport,
+            &Rectangle::INFINITE,
             renderer,
         );
 
@@ -852,6 +856,7 @@ where
         if (bounds.width > 0.) && (bounds.height > 0.) {
             renderer.fill_quad(
                 renderer::Quad {
+                    snap: true,
                     bounds,
                     border: Border {
                         radius: style_sheet[&style_state].border_radius.into(),
@@ -967,7 +972,7 @@ where
     for _ in 0..4 {
         rgba_colors = rgba_colors.push(
             Row::new()
-                .align_y(Alignment::Center)
+                .align_y(Vertical::Center)
                 .spacing(SPACING)
                 .padding(PADDING)
                 .height(Length::Fill)
@@ -1172,6 +1177,7 @@ fn block2<Message, Theme>(
         if (bounds.width > 0.) && (bounds.height > 0.) {
             renderer.fill_quad(
                 renderer::Quad {
+                    snap: true,
                     bounds,
                     border: Border {
                         radius: style_sheet[&StyleState::Focused].border_radius.into(),
@@ -1190,6 +1196,7 @@ fn block2<Message, Theme>(
         if (bounds.width > 0.) && (bounds.height > 0.) {
             renderer.fill_quad(
                 renderer::Quad {
+                    snap: true,
                     bounds,
                     border: Border {
                         radius: style_sheet[&StyleState::Focused].border_radius.into(),
@@ -1427,8 +1434,8 @@ fn rgba_color(
                 bounds: Size::new(label_layout.bounds().width, label_layout.bounds().height),
                 size: renderer.default_size(),
                 font: REQUIRED_FONT,
-                horizontal_alignment: Horizontal::Center,
-                vertical_alignment: Vertical::Center,
+                align_x: text::Alignment::Center,
+                align_y: Vertical::Center,
                 line_height: text::LineHeight::Relative(1.3),
                 shaping: text::Shaping::Advanced,
                 wrapping: Wrapping::default(),
@@ -1459,6 +1466,7 @@ fn rgba_color(
         if (background_bounds.width > 0.) && (background_bounds.height > 0.) {
             renderer.fill_quad(
                 renderer::Quad {
+                    snap: true,
                     bounds: background_bounds,
                     border: Border {
                         radius: style_sheet
@@ -1482,6 +1490,7 @@ fn rgba_color(
         if (bar_bounds.width > 0.) && (bar_bounds.height > 0.) {
             renderer.fill_quad(
                 renderer::Quad {
+                    snap: true,
                     bounds: bar_bounds,
                     border: Border {
                         radius: style_sheet
@@ -1511,8 +1520,8 @@ fn rgba_color(
                 bounds: Size::new(value_layout.bounds().width, value_layout.bounds().height),
                 size: renderer.default_size(),
                 font: renderer.default_font(),
-                horizontal_alignment: Horizontal::Center,
-                vertical_alignment: Vertical::Center,
+                align_x: text::Alignment::Center,
+                align_y: Vertical::Center,
                 line_height: iced::widget::text::LineHeight::Relative(1.3),
                 shaping: iced::widget::text::Shaping::Advanced,
                 wrapping: Wrapping::default(),
@@ -1529,6 +1538,7 @@ fn rgba_color(
         if (focus == target) && (bounds.width > 0.) && (bounds.height > 0.) {
             renderer.fill_quad(
                 renderer::Quad {
+                    snap: true,
                     bounds,
                     border: Border {
                         radius: style_sheet
@@ -1635,6 +1645,7 @@ fn hex_text(
     if (bounds.width > 0.) && (bounds.height > 0.) {
         renderer.fill_quad(
             renderer::Quad {
+                snap: true,
                 bounds,
                 border: Border {
                     radius: style_sheet[&hex_text_style_state].bar_border_radius.into(),
@@ -1653,8 +1664,8 @@ fn hex_text(
             bounds: Size::new(bounds.width, bounds.height),
             size: renderer.default_size(),
             font: renderer.default_font(),
-            horizontal_alignment: Horizontal::Center,
-            vertical_alignment: Vertical::Center,
+            align_x: text::Alignment::Center,
+            align_y: Vertical::Center,
             line_height: text::LineHeight::Relative(1.3),
             shaping: text::Shaping::Basic,
             wrapping: Wrapping::default(),
@@ -1759,11 +1770,11 @@ where
     fn default() -> Self {
         Self {
             cancel_button: Button::new(
-                widget::Text::new(icon_to_string(RequiredIcons::X)).font(REQUIRED_FONT),
+                widget::Text::new(Icons::X.to_codepoint_string()).font(REQUIRED_FONT),
             )
             .into(),
             submit_button: Button::new(
-                widget::Text::new(icon_to_string(RequiredIcons::Check)).font(REQUIRED_FONT),
+                widget::Text::new(Icons::Check.to_codepoint_string()).font(REQUIRED_FONT),
             )
             .into(),
         }

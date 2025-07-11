@@ -2,19 +2,25 @@
 //
 // It was written by Kaiden42 <gitlab@tinysn.com>
 
+// Current issues with this example - similar to time-picker, the widget does not re-render.
+// It's not obvious where to put the redraw request, so it's just been
+// thrown into the end of the update function just like in the time picker.
+
 use iced::{
+    alignment::Vertical,
     widget::{Button, Container, Row, Text},
-    Alignment, Element, Length,
+    Element, Length,
 };
 use iced_aw::{date_picker::Date, helpers::date_picker};
 
 fn main() -> iced::Result {
     iced::application(
-        "DatePicker example",
+        DatePickerExample::default,
         DatePickerExample::update,
         DatePickerExample::view,
     )
-    .font(iced_fonts::REQUIRED_FONT_BYTES)
+    .title("DatePicker example")
+    .font(iced_aw::temp_fonts::REQUIRED_FONT_BYTES)
     .run()
 }
 
@@ -60,7 +66,7 @@ impl DatePickerExample {
         );
 
         let row = Row::new()
-            .align_y(Alignment::Center)
+            .align_y(Vertical::Center)
             .spacing(10)
             .push(datepicker)
             .push(Text::new(format!("Date: {}", self.date,)));

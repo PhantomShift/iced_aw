@@ -48,9 +48,9 @@ where
     /// The height of the [`Badge`].
     height: Length,
     /// The horizontal alignment of the [`Badge`].
-    horizontal_alignment: Alignment,
+    align_x: Alignment,
     /// The vertical alignment of the [`Badge`].
-    vertical_alignment: Alignment,
+    align_y: Alignment,
     /// The style of the [`Badge`].
     class: Theme::Class<'a>,
     /// The content [`Element`] of the [`Badge`].
@@ -74,8 +74,8 @@ where
             padding: 7,
             width: Length::Shrink,
             height: Length::Shrink,
-            horizontal_alignment: Alignment::Center,
-            vertical_alignment: Alignment::Center,
+            align_x: Alignment::Center,
+            align_y: Alignment::Center,
             class: Theme::default(),
             content: content.into(),
         }
@@ -84,14 +84,14 @@ where
     /// Sets the horizontal alignment of the content of the [`Badge`].
     #[must_use]
     pub fn align_x(mut self, alignment: Alignment) -> Self {
-        self.horizontal_alignment = alignment;
+        self.align_x = alignment;
         self
     }
 
     /// Sets the vertical alignment of the content of the [`Badge`].
     #[must_use]
     pub fn align_y(mut self, alignment: Alignment) -> Self {
-        self.vertical_alignment = alignment;
+        self.align_y = alignment;
         self
     }
 
@@ -172,23 +172,23 @@ where
 
         content = content
             .move_to(Point::new(padding.left, padding.top))
-            .align(self.horizontal_alignment, self.vertical_alignment, size);
+            .align(self.align_x, self.align_y, size);
 
         Node::with_children(size.expand(padding), vec![content])
     }
 
-    fn on_event(
+    fn update(
         &mut self,
         state: &mut Tree,
-        event: Event,
+        event: &Event,
         layout: Layout<'_>,
         cursor: Cursor,
         renderer: &Renderer,
         clipboard: &mut dyn Clipboard,
         shell: &mut Shell<'_, Message>,
         viewport: &Rectangle,
-    ) -> event::Status {
-        self.content.as_widget_mut().on_event(
+    ) {
+        self.content.as_widget_mut().update(
             &mut state.children[0],
             event,
             layout
@@ -251,6 +251,7 @@ where
         if bounds.intersects(viewport) {
             renderer.fill_quad(
                 renderer::Quad {
+                    snap: true,
                     bounds,
                     border: Border {
                         radius: border_radius.into(),

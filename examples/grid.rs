@@ -11,8 +11,8 @@ use iced::{
 use iced_aw::{grid, grid_row};
 
 struct App {
-    horizontal_alignment: Horizontal,
-    vertical_alignment: Vertical,
+    align_x: Horizontal,
+    align_y: Vertical,
     column_spacing: f32,
     row_spacing: f32,
     fill_width: bool,
@@ -24,8 +24,8 @@ struct App {
 impl Default for App {
     fn default() -> Self {
         Self {
-            horizontal_alignment: Horizontal::Left,
-            vertical_alignment: Vertical::Center,
+            align_x: Horizontal::Left,
+            align_y: Vertical::Center,
             column_spacing: 5.0,
             row_spacing: 5.0,
             fill_width: false,
@@ -51,8 +51,8 @@ enum Message {
 impl App {
     fn update(&mut self, message: Message) {
         match message {
-            Message::HorizontalAlignment(align) => self.horizontal_alignment = align,
-            Message::VerticalAlignment(align) => self.vertical_alignment = align,
+            Message::HorizontalAlignment(align) => self.align_x = align,
+            Message::VerticalAlignment(align) => self.align_y = align,
             Message::ColumnSpacing(spacing) => self.column_spacing = spacing,
             Message::RowSpacing(spacing) => self.row_spacing = spacing,
             Message::FillWidth(fill) => self.fill_width = fill,
@@ -68,7 +68,7 @@ impl App {
                 .iter()
                 .map(horizontal_align_to_string)
                 .collect::<Vec<_>>(),
-            Some(horizontal_align_to_string(&self.horizontal_alignment)),
+            Some(horizontal_align_to_string(&self.align_x)),
             |selected| Message::HorizontalAlignment(string_to_horizontal_align(&selected)),
         );
 
@@ -77,7 +77,7 @@ impl App {
                 .iter()
                 .map(vertical_alignment_to_string)
                 .collect::<Vec<_>>(),
-            Some(vertical_alignment_to_string(&self.vertical_alignment)),
+            Some(vertical_alignment_to_string(&self.align_y)),
             |selected| Message::VerticalAlignment(string_to_vertical_align(&selected)),
         );
 
@@ -106,8 +106,8 @@ impl App {
             grid_row!("Padding", padding_slider),
             grid_row!("Debug mode", debug_mode_check)
         )
-        .horizontal_alignment(self.horizontal_alignment)
-        .vertical_alignment(self.vertical_alignment)
+        .horizontal_alignment(self.align_x)
+        .vertical_alignment(self.align_y)
         .row_spacing(self.row_spacing)
         .column_spacing(self.column_spacing)
         .padding(Padding::new(self.padding));
@@ -174,7 +174,8 @@ fn string_to_vertical_align(input: &str) -> Vertical {
 }
 
 fn main() -> iced::Result {
-    iced::application("Grid example", App::update, App::view)
-        .font(iced_fonts::REQUIRED_FONT_BYTES)
+    iced::application(App::default, App::update, App::view)
+        .title("Grid example")
+        .font(iced_aw::temp_fonts::REQUIRED_FONT_BYTES)
         .run()
 }

@@ -14,14 +14,15 @@ use iced::{
     event,
     mouse::{self, Cursor},
     touch,
-    widget::text::Wrapping,
+    widget::text::{self, Wrapping},
     Alignment, Border, Color, Element, Event, Length, Padding, Pixels, Point, Rectangle, Shadow,
     Size, Vector,
 };
-use iced_fonts::{
-    required::{icon_to_string, RequiredIcons},
-    REQUIRED_FONT,
-};
+// use iced_fonts::{
+//     required::{icon_to_string, RequiredIcons},
+//     REQUIRED_FONT,
+// };
+use crate::temp_fonts::{Icons, REQUIRED_FONT};
 
 pub use crate::style::{
     card::{Catalog, Style},
@@ -308,26 +309,26 @@ where
         )
     }
 
-    fn on_event(
+    fn update(
         &mut self,
         state: &mut Tree,
-        event: Event,
+        event: &Event,
         layout: Layout<'_>,
         cursor: Cursor,
         renderer: &Renderer,
         clipboard: &mut dyn Clipboard,
         shell: &mut Shell<'_, Message>,
         viewport: &Rectangle,
-    ) -> event::Status {
+    ) {
         let mut children = layout.children();
 
         let head_layout = children
             .next()
             .expect("widget: Layout should have a head layout");
         let mut head_children = head_layout.children();
-        let head_status = self.head.as_widget_mut().on_event(
+        self.head.as_widget_mut().update(
             &mut state.children[0],
-            event.clone(),
+            event,
             head_children
                 .next()
                 .expect("widget: Layout should have a head content layout"),
@@ -338,36 +339,35 @@ where
             viewport,
         );
 
-        let close_status = head_children
-            .next()
-            .map_or(event::Status::Ignored, |close_layout| {
-                match event {
-                    Event::Mouse(mouse::Event::ButtonPressed(mouse::Button::Left))
-                    | Event::Touch(touch::Event::FingerPressed { .. }) => self
-                        .on_close
-                        .clone()
-                        // TODO: `let` expressions in this position are experimental
-                        // see issue #53667 <https://github.com/rust-lang/rust/issues/53667> for more information
-                        .filter(|_| {
-                            close_layout
-                                .bounds()
-                                .contains(cursor.position().unwrap_or_default())
-                        })
-                        .map_or(event::Status::Ignored, |on_close| {
-                            shell.publish(on_close);
-                            event::Status::Captured
-                        }),
-                    _ => event::Status::Ignored,
-                }
-            });
+        head_children.next().iter().for_each(|close_layout| {
+            match event {
+                Event::Mouse(mouse::Event::ButtonPressed(mouse::Button::Left))
+                | Event::Touch(touch::Event::FingerPressed { .. }) => self
+                    .on_close
+                    .clone()
+                    // TODO: `let` expressions in this position are experimental
+                    // see issue #53667 <https://github.com/rust-lang/rust/issues/53667> for more information
+                    .filter(|_| {
+                        close_layout
+                            .bounds()
+                            .contains(cursor.position().unwrap_or_default())
+                    })
+                    .into_iter()
+                    .for_each(|on_close| {
+                        shell.publish(on_close);
+                        shell.capture_event();
+                    }),
+                _ => (),
+            }
+        });
 
         let body_layout = children
             .next()
             .expect("widget: Layout should have a body layout");
         let mut body_children = body_layout.children();
-        let body_status = self.body.as_widget_mut().on_event(
+        self.body.as_widget_mut().update(
             &mut state.children[1],
-            event.clone(),
+            event,
             body_children
                 .next()
                 .expect("widget: Layout should have a body content layout"),
@@ -382,8 +382,8 @@ where
             .next()
             .expect("widget: Layout should have a foot layout");
         let mut foot_children = foot_layout.children();
-        let foot_status = self.foot.as_mut().map_or(event::Status::Ignored, |foot| {
-            foot.as_widget_mut().on_event(
+        self.foot.as_mut().iter_mut().for_each(|foot| {
+            foot.as_widget_mut().update(
                 &mut state.children[2],
                 event,
                 foot_children
@@ -396,11 +396,6 @@ where
                 viewport,
             )
         });
-
-        head_status
-            .merge(close_status)
-            .merge(body_status)
-            .merge(foot_status)
     }
 
     fn mouse_interaction(
@@ -524,6 +519,7 @@ where
             // Background
             renderer.fill_quad(
                 renderer::Quad {
+                    snap: true,
                     bounds,
                     border: Border {
                         radius: style_sheet.border_radius.into(),
@@ -539,6 +535,7 @@ where
             renderer.fill_quad(
                 // TODO: fill not necessary
                 renderer::Quad {
+                    snap: true,
                     bounds,
                     border: Border {
                         radius: style_sheet.border_radius.into(),
@@ -601,8 +598,9 @@ where
     fn overlay<'b>(
         &'b mut self,
         tree: &'b mut Tree,
-        layout: Layout<'_>,
+        layout: Layout<'b>,
         renderer: &Renderer,
+        viewport: &Rectangle,
         translation: Vector,
     ) -> Option<iced::advanced::overlay::Element<'b, Message, Theme, Renderer>> {
         let mut children = vec![&mut self.head, &mut self.body];
@@ -615,9 +613,13 @@ where
             .zip(layout.children())
             .filter_map(|((child, state), layout)| {
                 layout.children().next().and_then(|child_layout| {
-                    child
-                        .as_widget_mut()
-                        .overlay(state, child_layout, renderer, translation)
+                    child.as_widget_mut().overlay(
+                        state,
+                        child_layout,
+                        renderer,
+                        viewport,
+                        translation,
+                    )
                 })
             })
             .collect::<Vec<_>>();
@@ -780,6 +782,7 @@ fn draw_head<Message, Theme, Renderer>(
     if bounds.intersects(viewport) {
         renderer.fill_quad(
             renderer::Quad {
+                snap: true,
                 bounds,
                 border: Border {
                     radius: border_radius.into(),
@@ -802,6 +805,7 @@ fn draw_head<Message, Theme, Renderer>(
     if button_bounds.intersects(viewport) {
         renderer.fill_quad(
             renderer::Quad {
+                snap: true,
                 bounds: button_bounds,
                 border: Border {
                     radius: (0.0).into(),
@@ -834,15 +838,15 @@ fn draw_head<Message, Theme, Renderer>(
 
         renderer.fill_text(
             iced::advanced::text::Text {
-                content: icon_to_string(RequiredIcons::X),
+                content: Icons::X.to_codepoint_string(),
                 bounds: Size::new(close_bounds.width, close_bounds.height),
                 size: Pixels(
                     close_size.unwrap_or_else(|| renderer.default_size().0)
                         + if is_mouse_over_close { 1.0 } else { 0.0 },
                 ),
                 font: REQUIRED_FONT,
-                horizontal_alignment: Horizontal::Center,
-                vertical_alignment: Vertical::Center,
+                align_x: text::Alignment::Center,
+                align_y: Vertical::Center,
                 line_height: LineHeight::Relative(1.3),
                 shaping: iced::advanced::text::Shaping::Advanced,
                 wrapping: Wrapping::default(),
@@ -876,6 +880,7 @@ fn draw_body<Message, Theme, Renderer>(
     if bounds.intersects(viewport) {
         renderer.fill_quad(
             renderer::Quad {
+                snap: true,
                 bounds,
                 border: Border {
                     radius: (0.0).into(),
@@ -925,6 +930,7 @@ fn draw_foot<Message, Theme, Renderer>(
     if bounds.intersects(viewport) {
         renderer.fill_quad(
             renderer::Quad {
+                snap: true,
                 bounds,
                 border: Border {
                     radius: style.border_radius.into(),

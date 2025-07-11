@@ -25,8 +25,8 @@ pub(super) fn layout<Message, Theme, Renderer>(
     column_spacing: Pixels,
     row_spacing: Pixels,
     padding: Padding,
-    horizontal_alignment: Horizontal,
-    vertical_alignment: Vertical,
+    align_x: Horizontal,
+    align_y: Vertical,
     width: Length,
     height: Length,
     column_lengths: &[Length],
@@ -82,8 +82,8 @@ where
         &row_heights,
         &column_widths,
         renderer,
-        horizontal_alignment,
-        vertical_alignment,
+        align_x,
+        align_y,
         column_spacing,
         row_spacing,
         padding,
@@ -196,7 +196,7 @@ fn create_grid_layout<Message, Theme, Renderer>(
     column_widths: &[f32],
     renderer: &Renderer,
     horizontal_alignment: Horizontal,
-    vertical_alignment: Vertical,
+    align_y: Vertical,
     column_spacing: Pixels,
     row_spacing: Pixels,
     padding: Padding,
@@ -231,7 +231,7 @@ where
                 .move_to(Point::new(x, y))
                 .align(
                     horizontal_alignment.into(),
-                    vertical_alignment.into(),
+                    align_y.into(),
                     Size::new(column_width, row_height),
                 );
             nodes.push(node);

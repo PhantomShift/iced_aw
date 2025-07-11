@@ -3,18 +3,20 @@
 // It was written by wiiznokes <wiiznokes2@gmail.com>
 
 use iced::{
+    alignment::Vertical,
     widget::{column, Button, Container, Row, Text},
-    Alignment, Element,
+    Element,
 };
 
 use iced_aw::ContextMenu;
 
 fn main() -> iced::Result {
     iced::application(
-        "ContextMenu example",
+        ContextMenuExample::default,
         ContextMenuExample::update,
         ContextMenuExample::view,
     )
+    .title("ContextMenu example")
     .run()
 }
 
@@ -41,7 +43,7 @@ impl ContextMenuExample {
         let underlay = Container::new(
             Row::new()
                 .spacing(10)
-                .align_y(Alignment::Center)
+                .align_y(Vertical::Center)
                 .push(Button::new(Text::new("right click me!")).on_press(Message::ButtonClicked))
                 .push(Text::new(format!(
                     "Last message: {}",

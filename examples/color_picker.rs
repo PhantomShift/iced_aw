@@ -3,6 +3,7 @@
 // It was written by Kaiden42 <gitlab@tinysn.com>
 
 use iced::{
+    alignment::Vertical,
     widget::{Button, Container, Row, Text},
     Alignment, Color, Element, Length,
 };
@@ -11,11 +12,12 @@ use iced_aw::helpers::color_picker;
 
 fn main() -> iced::Result {
     iced::application(
-        "Color Picker example",
+        ColorPickerExample::default,
         ColorPickerExample::update,
         ColorPickerExample::view,
     )
-    .font(iced_fonts::REQUIRED_FONT_BYTES)
+    .title("Color Picker example")
+    .font(iced_aw::temp_fonts::REQUIRED_FONT_BYTES)
     .subscription(ColorPickerExample::subscription)
     .run()
 }
@@ -72,7 +74,7 @@ impl ColorPickerExample {
         );
 
         let row = Row::new()
-            .align_y(Alignment::Center)
+            .align_y(Vertical::Center)
             .spacing(10)
             .push(color_picker)
             .push(Text::new(format!("Color: {:?}", self.color)));

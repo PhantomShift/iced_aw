@@ -7,6 +7,7 @@
 
 pub mod tab_label;
 
+use crate::temp_fonts::{Icons, REQUIRED_FONT};
 use iced::{
     advanced::{
         layout::{Limits, Node},
@@ -14,20 +15,15 @@ use iced::{
         widget::Tree,
         Clipboard, Layout, Shell, Widget,
     },
-    alignment::{self, Horizontal, Vertical},
-    event,
+    alignment::{self, Vertical},
     mouse::{self, Cursor},
     touch,
     widget::{
-        text::{self, LineHeight, Wrapping},
+        text::{self, Alignment, LineHeight, Wrapping},
         Column, Row, Text,
     },
-    Alignment, Background, Border, Color, Element, Event, Font, Length, Padding, Pixels, Point,
-    Rectangle, Shadow, Size,
-};
-use iced_fonts::{
-    required::{icon_to_string, RequiredIcons},
-    REQUIRED_FONT,
+    Background, Border, Color, Element, Event, Font, Length, Padding, Pixels, Point, Rectangle,
+    Shadow, Size,
 };
 
 use std::marker::PhantomData;
@@ -442,7 +438,7 @@ where
                                     Position::Right => {
                                         column = column.push(
                                             Row::new()
-                                                .align_y(Alignment::Center)
+                                                .align_y(Vertical::Center)
                                                 .push(layout_text(
                                                     text,
                                                     self.text_size + 1.0,
@@ -458,7 +454,7 @@ where
                                     Position::Left => {
                                         column = column.push(
                                             Row::new()
-                                                .align_y(Alignment::Center)
+                                                .align_y(Vertical::Center)
                                                 .push(layout_icon(
                                                     icon,
                                                     self.icon_size + 1.0,
@@ -492,7 +488,7 @@ where
                         .width(self.tab_width)
                         .height(self.height),
                     )
-                    .align_y(Alignment::Center)
+                    .align_y(Vertical::Center)
                     .padding(self.padding)
                     .width(self.tab_width);
 
@@ -501,7 +497,7 @@ where
                         Row::new()
                             .width(Length::Fixed(self.close_size * 1.3 + 1.0))
                             .height(Length::Fixed(self.close_size * 1.3 + 1.0))
-                            .align_y(Alignment::Center),
+                            .align_y(Vertical::Center),
                     );
                 }
 
@@ -510,7 +506,7 @@ where
             .width(self.width)
             .height(self.height)
             .spacing(self.spacing)
-            .align_y(Alignment::Center);
+            .align_y(Vertical::Center);
 
         let element: Element<Message, Theme, Renderer> = Element::new(row);
         let tab_tree = if let Some(child_tree) = tree.children.get_mut(0) {
@@ -527,17 +523,17 @@ where
             .layout(tab_tree, renderer, &limits.loose())
     }
 
-    fn on_event(
+    fn update(
         &mut self,
         _state: &mut Tree,
-        event: Event,
+        event: &Event,
         layout: Layout<'_>,
         cursor: Cursor,
         _renderer: &Renderer,
         _clipboard: &mut dyn Clipboard,
         shell: &mut Shell<'_, Message>,
         _viewport: &Rectangle,
-    ) -> event::Status {
+    ) {
         match event {
             Event::Mouse(mouse::Event::ButtonPressed(mouse::Button::Left))
             | Event::Touch(touch::Event::FingerPressed { .. }) => {
@@ -569,12 +565,11 @@ where
                                     |on_close| (on_close)(self.tab_indices[new_selected].clone()),
                                 ),
                         );
-                        return event::Status::Captured;
+                        shell.capture_event();
                     }
                 }
-                event::Status::Ignored
             }
-            _ => event::Status::Ignored,
+            _ => (),
         }
     }
 
@@ -629,6 +624,7 @@ where
         if bounds.intersects(viewport) {
             renderer.fill_quad(
                 renderer::Quad {
+                    snap: true,
                     bounds,
                     border: Border {
                         radius: (0.0).into(),
@@ -715,6 +711,7 @@ fn draw_tab<Theme, Renderer>(
     if bounds.intersects(viewport) {
         renderer.fill_quad(
             renderer::Quad {
+                snap: true,
                 bounds,
                 border: Border {
                     radius: (0.0).into(),
@@ -737,8 +734,8 @@ fn draw_tab<Theme, Renderer>(
                     bounds: Size::new(icon_bounds.width, icon_bounds.height),
                     size: Pixels(icon_data.1),
                     font: icon_data.0,
-                    horizontal_alignment: Horizontal::Center,
-                    vertical_alignment: Vertical::Center,
+                    align_x: Alignment::Center,
+                    align_y: Vertical::Center,
                     line_height: LineHeight::Relative(1.3),
                     shaping: iced::advanced::text::Shaping::Advanced,
                     wrapping: Wrapping::default(),
@@ -758,8 +755,8 @@ fn draw_tab<Theme, Renderer>(
                     bounds: Size::new(text_bounds.width, text_bounds.height),
                     size: Pixels(text_data.1),
                     font: text_data.0,
-                    horizontal_alignment: Horizontal::Center,
-                    vertical_alignment: Vertical::Center,
+                    align_x: Alignment::Center,
+                    align_y: Vertical::Center,
                     line_height: LineHeight::Relative(1.3),
                     shaping: iced::advanced::text::Shaping::Advanced,
                     wrapping: Wrapping::default(),
@@ -806,8 +803,8 @@ fn draw_tab<Theme, Renderer>(
                     bounds: Size::new(icon_bounds.width, icon_bounds.height),
                     size: Pixels(icon_data.1),
                     font: icon_data.0,
-                    horizontal_alignment: Horizontal::Center,
-                    vertical_alignment: Vertical::Center,
+                    align_x: Alignment::Center,
+                    align_y: Vertical::Center,
                     line_height: LineHeight::Relative(1.3),
                     shaping: iced::advanced::text::Shaping::Advanced,
                     wrapping: Wrapping::default(),
@@ -823,8 +820,8 @@ fn draw_tab<Theme, Renderer>(
                     bounds: Size::new(text_bounds.width, text_bounds.height),
                     size: Pixels(text_data.1),
                     font: text_data.0,
-                    horizontal_alignment: Horizontal::Center,
-                    vertical_alignment: Vertical::Center,
+                    align_x: Alignment::Center,
+                    align_y: Vertical::Center,
                     line_height: LineHeight::Relative(1.3),
                     shaping: iced::advanced::text::Shaping::Advanced,
                     wrapping: Wrapping::default(),
@@ -842,12 +839,12 @@ fn draw_tab<Theme, Renderer>(
 
         renderer.fill_text(
             iced::advanced::text::Text {
-                content: icon_to_string(RequiredIcons::X),
+                content: Icons::X.to_codepoint_string(),
                 bounds: Size::new(cross_bounds.width, cross_bounds.height),
                 size: Pixels(close_size + if is_mouse_over_cross { 1.0 } else { 0.0 }),
                 font: REQUIRED_FONT,
-                horizontal_alignment: Horizontal::Center,
-                vertical_alignment: Vertical::Center,
+                align_x: Alignment::Center,
+                align_y: Vertical::Center,
                 line_height: LineHeight::Relative(1.3),
                 shaping: iced::advanced::text::Shaping::Advanced,
                 wrapping: Wrapping::default(),
@@ -860,6 +857,7 @@ fn draw_tab<Theme, Renderer>(
         if is_mouse_over_cross && cross_bounds.intersects(viewport) {
             renderer.fill_quad(
                 renderer::Quad {
+                    snap: true,
                     bounds: cross_bounds,
                     border: Border {
                         radius: style.icon_border_radius,

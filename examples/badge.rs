@@ -3,16 +3,23 @@
 // It was written by Kaiden42 <gitlab@tinysn.com>
 
 use iced::{
+    alignment::Vertical,
     widget::{Column, Container, Row, Text},
     Alignment, Element, Length,
 };
 
 use iced_aw::{helpers::badge, style, style::status::Status};
 
-const BADGE_TEXT_SIZE: u16 = 15;
+const BADGE_TEXT_SIZE: u32 = 15;
 
 fn main() -> iced::Result {
-    iced::application("Badge example", BadgeExample::update, BadgeExample::view).run()
+    iced::application(
+        BadgeExample::default,
+        BadgeExample::update,
+        BadgeExample::view,
+    )
+    .title("Badge example")
+    .run()
 }
 
 #[derive(Debug, Clone)]
@@ -50,7 +57,7 @@ impl BadgeExample {
                 .fold(content, |col, (i, (name, count))| {
                     col.push(
                         Row::new()
-                            .align_y(Alignment::Center)
+                            .align_y(Vertical::Center)
                             .push(Text::new(name).width(Length::Fill))
                             .push(
                                 badge(Text::new(format!("{count}")).size(BADGE_TEXT_SIZE))

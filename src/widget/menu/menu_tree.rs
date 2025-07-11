@@ -315,7 +315,7 @@ where
         shell: &mut Shell<'_, Message>,
         viewport: &Rectangle,
         scroll_speed: ScrollSpeed,
-    ) -> event::Status {
+    ) {
         use event::Status::*;
 
         let mut lc = layout.children();
@@ -327,25 +327,17 @@ where
         let menu_state = tree.state.downcast_mut::<MenuState>();
         let slice = &menu_state.slice;
 
-        let status = self.items[slice.start_index..=slice.end_index] // [item...]
+        self.items[slice.start_index..=slice.end_index] // [item...]
             .iter_mut()
             .zip(tree.children[slice.start_index..=slice.end_index].iter_mut()) // [item_tree...]
             .zip(slice_layout.children()) // [item_layout...]
-            .map(|((item, tree), layout)| {
+            .for_each(|((item, tree), layout)| {
                 item.on_event(
-                    tree,
-                    event.clone(),
-                    layout,
-                    cursor,
-                    renderer,
-                    clipboard,
-                    shell,
-                    viewport,
+                    tree, &event, layout, cursor, renderer, clipboard, shell, viewport,
                 )
-            })
-            .fold(Ignored, event::Status::merge);
+            });
 
-        match event {
+        let status = match event {
             Event::Mouse(mouse::Event::ButtonPressed(mouse::Button::Left)) => {
                 if cursor.is_over(prescroll) {
                     menu_state.pressed = true;
@@ -373,8 +365,11 @@ where
                 }
             }
             _ => Ignored,
+        };
+
+        if event::Status::Captured == status {
+            shell.capture_event();
         }
-        .merge(status)
     }
 
     pub(super) fn operate(
@@ -408,7 +403,7 @@ where
     pub(super) fn overlay<'b>(
         &'b mut self,
         tree: &'b mut Tree,
-        layout: Layout<'_>,
+        layout: Layout<'b>,
         renderer: &Renderer,
         translation: Vector,
     ) -> Option<overlay::Element<'b, Message, Theme, Renderer>> {
@@ -494,6 +489,7 @@ where
         if pad_rectangle.intersects(viewport) {
             renderer.fill_quad(
                 renderer::Quad {
+                    snap: true,
                     bounds: pad_rectangle,
                     border: theme_style.menu_border,
                     shadow: theme_style.menu_shadow,
@@ -601,7 +597,8 @@ where
         tree: &mut Tree,
         layout: Layout<'_>,
         cursor: mouse::Cursor,
-    ) -> event::Status {
+        shell: &mut Shell<'_, Message>,
+    ) {
         let mut lc = layout.children();
         let slice_layout = lc.next().unwrap();
         // let prescroll = lc.next().unwrap().bounds();
@@ -619,10 +616,9 @@ where
         {
             if item.menu.is_some() && cursor.is_over(layout.bounds()) {
                 menu_state.active = Some(i + slice.start_index);
-                return event::Status::Captured;
+                return shell.capture_event();
             }
         }
-        event::Status::Ignored
     }
 
     pub(super) fn close_event(
@@ -758,15 +754,15 @@ where
     pub(super) fn on_event(
         &mut self,
         tree: &mut Tree,
-        event: Event,
+        event: &Event,
         layout: Layout<'_>,
         cursor: mouse::Cursor,
         renderer: &Renderer,
         clipboard: &mut dyn Clipboard,
         shell: &mut Shell<'_, Message>,
         viewport: &Rectangle,
-    ) -> event::Status {
-        self.item.as_widget_mut().on_event(
+    ) {
+        self.item.as_widget_mut().update(
             &mut tree.children[0],
             event,
             layout,
@@ -836,13 +832,17 @@ where
     pub(super) fn overlay<'b>(
         &'b mut self,
         tree: &'b mut Tree,
-        layout: Layout<'_>,
+        layout: Layout<'b>,
         renderer: &Renderer,
         translation: Vector,
     ) -> Option<overlay::Element<'b, Message, Theme, Renderer>> {
-        self.item
-            .as_widget_mut()
-            .overlay(&mut tree.children[0], layout, renderer, translation)
+        self.item.as_widget_mut().overlay(
+            &mut tree.children[0],
+            layout,
+            renderer,
+            &Rectangle::INFINITE,
+            translation,
+        )
     }
 }
 

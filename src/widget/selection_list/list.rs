@@ -5,7 +5,7 @@ use crate::selection_list::Catalog;
 use iced::{
     advanced::{
         layout::{Limits, Node},
-        renderer,
+        renderer, text,
         widget::{
             tree::{State, Tag},
             Tree,
@@ -125,19 +125,18 @@ where
         Node::new(intrinsic)
     }
 
-    fn on_event(
+    fn update(
         &mut self,
         state: &mut Tree,
-        event: Event,
+        event: &Event,
         layout: Layout<'_>,
         cursor: Cursor,
         _renderer: &Renderer,
         _clipboard: &mut dyn Clipboard,
         shell: &mut Shell<Message>,
         _viewport: &Rectangle,
-    ) -> event::Status {
+    ) {
         let bounds = layout.bounds();
-        let mut status = event::Status::Ignored;
         let list_state = state.state.downcast_mut::<ListState>();
         let cursor = cursor.position().unwrap_or_default();
 
@@ -164,25 +163,25 @@ where
                         }
                     }
 
-                    status =
-                        list_state
-                            .last_selected_index
-                            .map_or(event::Status::Ignored, |last| {
-                                if let Some(option) = self.options.get(last.0) {
-                                    shell.publish((self.on_selected)(last.0, option.clone()));
-                                    event::Status::Captured
-                                } else {
-                                    event::Status::Ignored
-                                }
-                            });
+                    list_state
+                        .last_selected_index
+                        .iter()
+                        .take_while(|last| {
+                            if let Some(option) = self.options.get(last.0) {
+                                shell.publish((self.on_selected)(last.0, option.clone()));
+                                shell.capture_event();
+                                false
+                            } else {
+                                true
+                            }
+                        })
+                        .for_each(drop);
                 }
                 _ => {}
             }
         } else {
             list_state.hovered_option = None;
         }
-
-        status
     }
 
     fn mouse_interaction(
@@ -235,6 +234,7 @@ where
             if (is_selected || is_hovered) && (bounds.width > 0.) && (bounds.height > 0.) {
                 renderer.fill_quad(
                     renderer::Quad {
+                        snap: true,
                         bounds,
                         border: Border {
                             radius: (0.0).into(),
@@ -275,8 +275,8 @@ where
                     bounds: Size::new(f32::INFINITY, bounds.height),
                     size: Pixels(self.text_size),
                     font: self.font,
-                    horizontal_alignment: Horizontal::Left,
-                    vertical_alignment: Vertical::Center,
+                    align_x: text::Alignment::Left,
+                    align_y: Vertical::Center,
                     line_height: LineHeight::default(),
                     shaping: iced::widget::text::Shaping::Advanced,
                     wrapping: Wrapping::default(),

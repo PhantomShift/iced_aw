@@ -122,6 +122,7 @@ where
         if (bounds.width > 0.) && (bounds.height > 0.) {
             renderer.fill_quad(
                 renderer::Quad {
+                    snap: true,
                     bounds,
                     border: Border {
                         radius: (0.0).into(),
@@ -151,15 +152,15 @@ where
         );
     }
 
-    fn on_event(
+    fn update(
         &mut self,
-        event: Event,
+        event: &Event,
         layout: Layout<'_>,
         cursor: Cursor,
         renderer: &Renderer,
         clipboard: &mut dyn Clipboard,
         shell: &mut Shell<Message>,
-    ) -> Status {
+    ) {
         let layout_children = layout
             .children()
             .next()
@@ -204,8 +205,12 @@ where
             _ => Status::Ignored,
         };
 
-        let child_status = if forward_event_to_children {
-            self.content.as_widget_mut().on_event(
+        if Status::Captured == status {
+            shell.capture_event();
+        }
+
+        if forward_event_to_children {
+            self.content.as_widget_mut().update(
                 self.tree,
                 event,
                 layout_children,
@@ -214,14 +219,7 @@ where
                 clipboard,
                 shell,
                 &layout.bounds(),
-            )
-        } else {
-            Status::Ignored
-        };
-
-        match child_status {
-            Status::Ignored => status,
-            Status::Captured => Status::Captured,
+            );
         }
     }
 
@@ -229,7 +227,6 @@ where
         &self,
         layout: Layout<'_>,
         cursor: Cursor,
-        viewport: &Rectangle,
         renderer: &Renderer,
     ) -> mouse::Interaction {
         self.content.as_widget().mouse_interaction(
@@ -239,7 +236,7 @@ where
                 .next()
                 .expect("widget: Layout should have a content layout."),
             cursor,
-            viewport,
+            &Rectangle::INFINITE,
             renderer,
         )
     }

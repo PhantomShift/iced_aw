@@ -2,9 +2,12 @@
 //
 // This was written by Ultraxime <36888699+Ultraxime@users.noreply.github.com>
 
+// Current issues for this example - Strangely slow to update
+
 use iced::{
+    alignment::Vertical,
     widget::{Container, Row, Text},
-    Alignment, Element, Length,
+    Element, Length,
 };
 use iced_aw::widgets::typed_input;
 
@@ -21,15 +24,16 @@ pub enum Message {
 
 fn main() -> iced::Result {
     iced::application(
-        "Typed Input example",
+        TypedInputDemo::default,
         TypedInputDemo::update,
         TypedInputDemo::view,
     )
+    .title("Typed Input example")
     .window_size(iced::Size {
         width: 250.0,
         height: 200.0,
     })
-    .font(iced_fonts::REQUIRED_FONT_BYTES)
+    .font(iced_aw::temp_fonts::REQUIRED_FONT_BYTES)
     .run()
 }
 
@@ -56,7 +60,7 @@ impl TypedInputDemo {
         Container::new(
             Row::new()
                 .spacing(10)
-                .align_y(Alignment::Center)
+                .align_y(Vertical::Center)
                 .push(lb_minute)
                 .push(txt_minute),
         )

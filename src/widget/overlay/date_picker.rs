@@ -42,10 +42,11 @@ use iced::{
     Shadow,
     Size,
 };
-use iced_fonts::{
-    required::{icon_to_string, RequiredIcons},
-    REQUIRED_FONT,
-};
+// use iced_fonts::{
+//     required::{icon_to_string, RequiredIcons},
+//     REQUIRED_FONT,
+// };
+use crate::temp_fonts::{Icons, REQUIRED_FONT};
 use std::collections::HashMap;
 
 /// The padding around the elements.
@@ -109,7 +110,7 @@ where
         DatePickerOverlay {
             state: overlay_state,
             cancel_button: Button::new(
-                text::Text::new(icon_to_string(RequiredIcons::X))
+                text::Text::new(Icons::X.to_codepoint_string())
                     .font(REQUIRED_FONT)
                     .size(font_size)
                     .align_x(Horizontal::Center)
@@ -118,7 +119,7 @@ where
             .width(Length::Fill)
             .on_press(on_cancel.clone()),
             submit_button: Button::new(
-                text::Text::new(icon_to_string(RequiredIcons::Check))
+                text::Text::new(Icons::Check.to_codepoint_string())
                     .font(REQUIRED_FONT)
                     .size(font_size)
                     .align_x(Horizontal::Center)
@@ -404,11 +405,11 @@ where
                 Row::new()
                     .width(Length::Shrink)
                     .spacing(SPACING)
-                    .align_y(Alignment::Center)
+                    .align_y(Vertical::Center)
                     .push(
                         // Left Month arrow
                         Container::new(
-                            Text::new(icon_to_string(RequiredIcons::CaretLeftFill))
+                            Text::new(Icons::CaretLeftFill.to_codepoint_string())
                                 .size(font_size.0 + 1.0)
                                 .font(REQUIRED_FONT),
                         )
@@ -422,7 +423,7 @@ where
                     .push(
                         // Right Month arrow
                         Container::new(
-                            Text::new(icon_to_string(RequiredIcons::CaretRightFill))
+                            Text::new(Icons::CaretRightFill.to_codepoint_string())
                                 .size(font_size.0 + 1.0)
                                 .font(REQUIRED_FONT),
                         )
@@ -434,11 +435,11 @@ where
                 Row::new()
                     .width(Length::Shrink)
                     .spacing(SPACING)
-                    .align_y(Alignment::Center)
+                    .align_y(Vertical::Center)
                     .push(
                         // Left Year arrow
                         Container::new(
-                            Text::new(icon_to_string(RequiredIcons::CaretLeftFill))
+                            Text::new(Icons::CaretLeftFill.to_codepoint_string())
                                 .size(font_size.0 + 1.0)
                                 .font(REQUIRED_FONT),
                         )
@@ -452,7 +453,7 @@ where
                     .push(
                         // Right Year arrow
                         Container::new(
-                            Text::new(icon_to_string(RequiredIcons::CaretRightFill))
+                            Text::new(Icons::CaretRightFill.to_codepoint_string())
                                 .size(font_size.0 + 1.0)
                                 .font(REQUIRED_FONT),
                         )
@@ -550,17 +551,17 @@ where
         node
     }
 
-    fn on_event(
+    fn update(
         &mut self,
-        event: Event,
+        event: &Event,
         layout: Layout<'_>,
         cursor: Cursor,
         renderer: &Renderer,
         clipboard: &mut dyn Clipboard,
         shell: &mut Shell<Message>,
-    ) -> event::Status {
-        if event::Status::Captured == self.on_event_keyboard(&event) {
-            return event::Status::Captured;
+    ) {
+        if event::Status::Captured == self.on_event_keyboard(event) {
+            return shell.capture_event();
         }
 
         let mut children = layout.children();
@@ -574,7 +575,7 @@ where
         let month_year_layout = date_children
             .next()
             .expect("widget: Layout should have a month/year layout");
-        let month_year_status = self.on_event_month_year(&event, month_year_layout, cursor);
+        let month_year_status = self.on_event_month_year(event, month_year_layout, cursor);
 
         // ----------- Days ----------------------
         let days_layout = date_children
@@ -583,16 +584,16 @@ where
             .children()
             .next()
             .expect("widget: Layout should have a days table layout");
-        let days_status = self.on_event_days(&event, days_layout, cursor);
+        let days_status = self.on_event_days(event, days_layout, cursor);
 
         // ----------- Buttons ------------------------
         let cancel_button_layout = children
             .next()
             .expect("widget: Layout should have a cancel button layout for a DatePicker");
 
-        let cancel_status = self.cancel_button.on_event(
+        self.cancel_button.update(
             &mut self.tree.children[0],
-            event.clone(),
+            event,
             cancel_button_layout,
             cursor,
             renderer,
@@ -607,7 +608,7 @@ where
 
         let mut fake_messages: Vec<Message> = Vec::new();
 
-        let submit_status = self.submit_button.on_event(
+        self.submit_button.update(
             &mut self.tree.children[1],
             event,
             submit_button_layout,
@@ -622,17 +623,16 @@ where
             shell.publish((self.on_submit)(self.state.date.into()));
         }
 
-        month_year_status
-            .merge(days_status)
-            .merge(cancel_status)
-            .merge(submit_status)
+        if event::Status::Captured == month_year_status.merge(days_status) {
+            shell.capture_event();
+            shell.request_redraw();
+        }
     }
 
     fn mouse_interaction(
         &self,
         layout: Layout<'_>,
         cursor: Cursor,
-        viewport: &Rectangle,
         renderer: &Renderer,
     ) -> mouse::Interaction {
         let mouse_interaction = mouse::Interaction::default();
@@ -716,7 +716,7 @@ where
             &self.tree.children[0],
             cancel_button_layout,
             cursor,
-            viewport,
+            &Rectangle::INFINITE,
             renderer,
         );
 
@@ -728,7 +728,7 @@ where
             &self.tree.children[1],
             submit_button_layout,
             cursor,
-            viewport,
+            &Rectangle::INFINITE,
             renderer,
         );
 
@@ -785,6 +785,7 @@ where
         if (bounds.width > 0.) && (bounds.height > 0.) {
             renderer.fill_quad(
                 renderer::Quad {
+                    snap: true,
                     bounds,
                     border: Border {
                         radius: style_sheet[&style_state].border_radius.into(),
@@ -867,6 +868,7 @@ where
         {
             renderer.fill_quad(
                 renderer::Quad {
+                    snap: true,
                     bounds: cancel_button_bounds,
                     border: Border {
                         radius: style_sheet[&StyleState::Focused].border_radius.into(),
@@ -886,6 +888,7 @@ where
         {
             renderer.fill_quad(
                 renderer::Quad {
+                    snap: true,
                     bounds: submit_button_bounds,
                     border: Border {
                         radius: style_sheet[&StyleState::Focused].border_radius.into(),
@@ -957,14 +960,14 @@ where
     fn default() -> Self {
         Self {
             cancel_button: Button::new(
-                text::Text::new(icon_to_string(RequiredIcons::X))
+                text::Text::new(Icons::X.to_codepoint_string())
                     .font(REQUIRED_FONT)
                     .align_x(Horizontal::Center)
                     .width(Length::Fill),
             )
             .into(),
             submit_button: Button::new(
-                text::Text::new(icon_to_string(RequiredIcons::Check))
+                text::Text::new(Icons::Check.to_codepoint_string())
                     .font(REQUIRED_FONT)
                     .align_x(Horizontal::Center)
                     .width(Length::Fill),
@@ -1139,6 +1142,7 @@ fn month_year(
         if (style_state == StyleState::Focused) && (bounds.width > 0.) && (bounds.height > 0.) {
             renderer.fill_quad(
                 renderer::Quad {
+                    snap: true,
                     bounds,
                     border: Border {
                         radius: style
@@ -1167,12 +1171,12 @@ fn month_year(
         // Left caret
         renderer.fill_text(
             iced::advanced::Text {
-                content: icon_to_string(RequiredIcons::CaretLeftFill),
+                content: Icons::CaretLeftFill.to_codepoint_string(),
                 bounds: Size::new(left_bounds.width, left_bounds.height),
                 size: Pixels(font_size.0 + if left_arrow_hovered { 1.0 } else { 0.0 }),
                 font: REQUIRED_FONT,
-                horizontal_alignment: Horizontal::Center,
-                vertical_alignment: Vertical::Center,
+                align_x: text::Alignment::Center,
+                align_y: Vertical::Center,
                 line_height: text::LineHeight::Relative(1.3),
                 shaping: text::Shaping::Advanced,
                 wrapping: Wrapping::default(),
@@ -1192,8 +1196,8 @@ fn month_year(
                 bounds: Size::new(center_bounds.width, center_bounds.height),
                 size: font_size,
                 font: renderer.default_font(),
-                horizontal_alignment: Horizontal::Center,
-                vertical_alignment: Vertical::Center,
+                align_x: text::Alignment::Center,
+                align_y: Vertical::Center,
                 line_height: text::LineHeight::Relative(1.3),
                 shaping: text::Shaping::Basic,
                 wrapping: Wrapping::default(),
@@ -1209,12 +1213,12 @@ fn month_year(
         // Right caret
         renderer.fill_text(
             iced::advanced::Text {
-                content: icon_to_string(RequiredIcons::CaretRightFill),
+                content: Icons::CaretRightFill.to_codepoint_string(),
                 bounds: Size::new(right_bounds.width, right_bounds.height),
                 size: Pixels(font_size.0 + if right_arrow_hovered { 1.0 } else { 0.0 }),
                 font: REQUIRED_FONT,
-                horizontal_alignment: Horizontal::Center,
-                vertical_alignment: Vertical::Center,
+                align_x: text::Alignment::Center,
+                align_y: Vertical::Center,
                 line_height: text::LineHeight::Relative(1.3),
                 shaping: text::Shaping::Advanced,
                 wrapping: Wrapping::default(),
@@ -1283,8 +1287,8 @@ fn day_labels(
                 bounds: Size::new(bounds.width, bounds.height),
                 size: font_size,
                 font: renderer.default_font(),
-                horizontal_alignment: Horizontal::Center,
-                vertical_alignment: Vertical::Center,
+                align_x: text::Alignment::Center,
+                align_y: Vertical::Center,
                 line_height: text::LineHeight::Relative(1.3),
                 shaping: text::Shaping::Basic,
                 wrapping: Wrapping::default(),
@@ -1330,6 +1334,7 @@ fn day_table(
             if (bounds.width > 0.) && (bounds.height > 0.) {
                 renderer.fill_quad(
                     renderer::Quad {
+                        snap: true,
                         bounds,
                         border: Border {
                             radius: (bounds.height / 2.0).into(),
@@ -1347,6 +1352,7 @@ fn day_table(
                 if focus == Focus::Day && selected {
                     renderer.fill_quad(
                         renderer::Quad {
+                            snap: true,
                             bounds,
                             border: Border {
                                 radius: style
@@ -1376,8 +1382,8 @@ fn day_table(
                     bounds: Size::new(bounds.width, bounds.height),
                     size: font_size,
                     font: renderer.default_font(),
-                    horizontal_alignment: Horizontal::Center,
-                    vertical_alignment: Vertical::Center,
+                    align_x: text::Alignment::Center,
+                    align_y: Vertical::Center,
                     line_height: text::LineHeight::Relative(1.3),
                     shaping: text::Shaping::Basic,
                     wrapping: Wrapping::default(),

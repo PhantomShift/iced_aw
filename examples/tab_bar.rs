@@ -3,6 +3,7 @@
 // It was written by Kaiden42 <gitlab@tinysn.com>
 
 use iced::{
+    alignment::Vertical,
     widget::{Button, Column, Row, Text, TextInput},
     Alignment, Element, Length,
 };
@@ -10,11 +11,12 @@ use iced_aw::{TabBar, TabLabel};
 
 fn main() -> iced::Result {
     iced::application(
-        "Tab Bar example",
+        TabBarExample::default,
         TabBarExample::update,
         TabBarExample::view,
     )
-    .font(iced_fonts::REQUIRED_FONT_BYTES)
+    .title("Tab Bar example")
+    .font(iced_aw::temp_fonts::REQUIRED_FONT_BYTES)
     .run()
 }
 
@@ -86,7 +88,7 @@ impl TabBarExample {
                             .padding(5.0),
                     )
                     .push(Button::new(Text::new("New")).on_press(Message::NewTab))
-                    .align_y(Alignment::Center)
+                    .align_y(Vertical::Center)
                     .padding(10.0)
                     .spacing(5.0),
             )

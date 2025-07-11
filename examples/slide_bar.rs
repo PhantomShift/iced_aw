@@ -11,11 +11,12 @@ use iced_aw::SlideBar;
 
 fn main() -> iced::Result {
     iced::application(
-        "Slider Bar example",
+        SlideBarExample::default,
         SlideBarExample::update,
         SlideBarExample::view,
     )
-    .font(iced_fonts::REQUIRED_FONT_BYTES)
+    .title("Slider Bar example")
+    .font(iced_aw::temp_fonts::REQUIRED_FONT_BYTES)
     .run()
 }
 

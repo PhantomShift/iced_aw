@@ -6,7 +6,7 @@ mod login;
 use iced::{
     alignment::{Horizontal, Vertical},
     widget::{Column, Container, Text},
-    Element, Font, Length,
+    Element, Font, Length, Pixels,
 };
 use iced_aw::{TabLabel, Tabs};
 use login::{LoginMessage, LoginTab};
@@ -20,8 +20,8 @@ use counter::{CounterMessage, CounterTab};
 mod settings;
 use settings::{style_from_index, SettingsMessage, SettingsTab, TabBarPosition};
 
-const HEADER_SIZE: u16 = 32;
-const TAB_PADDING: u16 = 16;
+const HEADER_SIZE: u32 = 32;
+const TAB_PADDING: u32 = 16;
 const ICON_BYTES: &[u8] = include_bytes!("./fonts/icons.ttf");
 const ICON: Font = Font::with_name("icons");
 
@@ -44,10 +44,15 @@ impl From<Icon> for char {
 }
 
 fn main() -> iced::Result {
-    iced::application("Tabs example", TabBarExample::update, TabBarExample::view)
-        .font(iced_fonts::REQUIRED_FONT_BYTES)
-        .font(ICON_BYTES)
-        .run()
+    iced::application(
+        TabBarExample::default,
+        TabBarExample::update,
+        TabBarExample::view,
+    )
+    .title("Tabs example")
+    .font(iced_aw::temp_fonts::REQUIRED_FONT_BYTES)
+    .font(ICON_BYTES)
+    .run()
 }
 
 #[derive(Default)]
@@ -154,7 +159,7 @@ trait Tab {
             .height(Length::Fill)
             .align_x(Horizontal::Center)
             .align_y(Vertical::Center)
-            .padding(TAB_PADDING)
+            .padding(Pixels::from(TAB_PADDING))
             .into()
     }
 

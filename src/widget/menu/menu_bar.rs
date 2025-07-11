@@ -177,42 +177,33 @@ where
         )
     }
 
-    fn on_event(
+    fn update(
         &mut self,
         tree: &mut Tree,
-        event: event::Event,
+        event: &event::Event,
         layout: Layout<'_>,
         cursor: mouse::Cursor,
         renderer: &Renderer,
         clipboard: &mut dyn Clipboard,
         shell: &mut Shell<'_, Message>,
         viewport: &Rectangle,
-    ) -> event::Status {
+    ) {
         use event::Status::*;
 
-        let status = self
-            .roots
+        self.roots
             .iter_mut() // [Item...]
             .zip(tree.children.iter_mut()) // [item_tree...]
             .zip(layout.children()) // [widget_node...]
-            .map(|((item, tree), layout)| {
+            .for_each(|((item, tree), layout)| {
                 item.on_event(
-                    tree,
-                    event.clone(),
-                    layout,
-                    cursor,
-                    renderer,
-                    clipboard,
-                    shell,
-                    viewport,
+                    tree, event, layout, cursor, renderer, clipboard, shell, viewport,
                 )
-            })
-            .fold(Ignored, event::Status::merge);
+            });
 
         let bar = tree.state.downcast_mut::<MenuBarState>();
         let bar_bounds = layout.bounds();
 
-        match event {
+        let status = match event {
             Event::Mouse(mouse::Event::ButtonPressed(mouse::Button::Left)) => {
                 if cursor.is_over(bar_bounds) {
                     bar.is_pressed = true;
@@ -254,8 +245,11 @@ where
                 }
             }
             _ => Ignored,
+        };
+
+        if event::Status::Captured == status {
+            shell.capture_event();
         }
-        .merge(status)
     }
 
     fn operate(
@@ -308,6 +302,7 @@ where
         let styling = theme.style(&self.class, Status::Active);
         renderer.fill_quad(
             renderer::Quad {
+                snap: true,
                 bounds: pad_rectangle(layout.bounds(), styling.bar_background_expand),
                 border: styling.bar_border,
                 shadow: styling.bar_shadow,
@@ -356,6 +351,7 @@ where
         tree: &'b mut Tree,
         layout: Layout<'_>,
         _renderer: &Renderer,
+        _viewport: &Rectangle,
         translation: iced::Vector,
     ) -> Option<overlay::Element<'b, Message, Theme, Renderer>> {
         let state = tree.state.downcast_mut::<MenuBarState>();

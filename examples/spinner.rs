@@ -2,6 +2,8 @@
 //
 // This was written by Iohann Rabeson <irabeson42@gmail.com>
 
+// Current issues with this example - pick list items are not rendered but at least interactable
+
 use iced::widget::PickList;
 use iced::{
     widget::{column, container},
@@ -54,11 +56,12 @@ impl SpinnerExample {
 
 fn main() -> iced::Result {
     iced::application(
-        "Spinner example",
+        SpinnerExample::default,
         SpinnerExample::update,
         SpinnerExample::view,
     )
-    .font(iced_fonts::REQUIRED_FONT_BYTES)
+    .title("Spinner example")
+    .font(iced_aw::temp_fonts::REQUIRED_FONT_BYTES)
     .theme(SpinnerExample::theme)
     .run()
 }

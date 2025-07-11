@@ -93,6 +93,7 @@ where
             if let Some(b) = self.bg_color {
                 renderer.fill_quad(
                     renderer::Quad {
+                        snap: true,
                         bounds,
                         border: self.bg_border,
                         shadow: self.bg_shadow,
@@ -102,6 +103,7 @@ where
             }
             renderer.fill_quad(
                 renderer::Quad {
+                    snap: true,
                     bounds: self.inner_bounds.get_bounds(bounds),
                     border: self.quad_border,
                     shadow: self.quad_shadow,

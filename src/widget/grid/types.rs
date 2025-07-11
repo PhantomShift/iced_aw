@@ -10,8 +10,8 @@ use iced::{
 #[allow(missing_debug_implementations)]
 pub struct Grid<'a, Message, Theme = iced::Theme, Renderer = iced::Renderer> {
     pub(super) rows: Vec<GridRow<'a, Message, Theme, Renderer>>,
-    pub(super) horizontal_alignment: Horizontal,
-    pub(super) vertical_alignment: Vertical,
+    pub(super) align_x: Horizontal,
+    pub(super) align_y: Vertical,
     pub(super) column_spacing: Pixels,
     pub(super) row_spacing: Pixels,
     pub(super) padding: Padding,
@@ -28,8 +28,8 @@ where
     fn default() -> Self {
         Self {
             rows: Vec::new(),
-            horizontal_alignment: Horizontal::Left,
-            vertical_alignment: Vertical::Center,
+            align_x: Horizontal::Left,
+            align_y: Vertical::Center,
             column_spacing: 1.0.into(),
             row_spacing: 1.0.into(),
             padding: Padding::ZERO,
@@ -80,7 +80,7 @@ where
     /// [`Horizontal::Left`]
     #[must_use]
     pub fn horizontal_alignment(mut self, align: Horizontal) -> Self {
-        self.horizontal_alignment = align;
+        self.align_x = align;
         self
     }
 
@@ -88,7 +88,7 @@ where
     /// [`Vertical::Center`]
     #[must_use]
     pub fn vertical_alignment(mut self, align: Vertical) -> Self {
-        self.vertical_alignment = align;
+        self.align_y = align;
         self
     }
 

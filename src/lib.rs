@@ -81,6 +81,43 @@ pub mod style;
 pub use iced::Element;
 pub use iced_fonts;
 
+/// Note - This is very purposefully put here because this is intended to be a stopgap solution
+/// until the team can start working on version 14 compatibility
+#[allow(missing_docs)]
+pub mod temp_fonts {
+    /// Placeholder fonts that `iced_aw` uses by default.
+    /// Currently nerd font since it's icon-only.
+    pub const REQUIRED_FONT: iced::font::Font = iced_fonts::NERD_FONT;
+    pub const REQUIRED_FONT_BYTES: &[u8] = iced_fonts::NERD_FONT_BYTES;
+    /// Placeholder Icons enum for convenient access to used icons in `iced_aw`.
+    pub enum Icons {
+        X,
+        CaretDownFill,
+        CaretUpFill,
+        CaretRightFill,
+        CaretLeftFill,
+        Check,
+    }
+
+    impl Icons {
+        #[must_use]
+        pub const fn to_codepoint(self) -> char {
+            match self {
+                Self::X => '\u{f467}',
+                Self::CaretDownFill => '\u{f0d7}',
+                Self::CaretUpFill => '\u{f0d8}',
+                Self::CaretRightFill => '\u{f0da}',
+                Self::CaretLeftFill => '\u{f0d9}',
+                Self::Check => '\u{f42e}',
+            }
+        }
+        #[must_use]
+        pub fn to_codepoint_string(self) -> String {
+            String::from(self.to_codepoint())
+        }
+    }
+}
+
 /// Exports for all platforms that are not WASM32.
 mod platform {
     #[allow(unused_imports)]

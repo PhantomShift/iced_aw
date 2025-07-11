@@ -2,9 +2,12 @@ mod login;
 use iced::{
     alignment::{Horizontal, Vertical},
     widget::{Column, Container, Text},
-    Element, Font, Length,
+    Element, Font, Length, Pixels,
 };
-use iced_aw::sidebar::{SidebarWithContent, TabLabel};
+use iced_aw::{
+    sidebar::{SidebarWithContent, TabLabel},
+    temp_fonts,
+};
 use login::{LoginMessage, LoginTab};
 
 mod ferris;
@@ -16,8 +19,8 @@ use counter::{CounterMessage, CounterTab};
 mod settings;
 use settings::{style_from_index, SettingsMessage, SettingsTab, SidebarPosition};
 
-const HEADER_SIZE: u16 = 32;
-const TAB_PADDING: u16 = 16;
+const HEADER_SIZE: u32 = 32;
+const TAB_PADDING: u32 = 16;
 const ICON_BYTES: &[u8] = include_bytes!("fonts/icons.ttf");
 const ICON: Font = Font::with_name("icons");
 
@@ -41,11 +44,11 @@ impl From<Icon> for char {
 
 fn main() -> iced::Result {
     iced::application(
-        "Sidebar example",
+        TabBarExample::default,
         TabBarExample::update,
         TabBarExample::view,
     )
-    .font(iced_fonts::REQUIRED_FONT_BYTES)
+    .font(temp_fonts::REQUIRED_FONT_BYTES)
     .font(ICON_BYTES)
     .run()
 }
@@ -79,6 +82,10 @@ enum Message {
 }
 
 impl TabBarExample {
+    fn title(&self) -> &'static str {
+        "Sidebar example"
+    }
+
     fn update(&mut self, message: Message) {
         match message {
             Message::TabSelected(selected) => self.active_tab = selected,
@@ -155,7 +162,7 @@ trait Tab {
             .height(Length::Fill)
             .align_x(Horizontal::Center)
             .align_y(Vertical::Center)
-            .padding(TAB_PADDING)
+            .padding(Pixels::from(TAB_PADDING))
             .into()
     }
 

@@ -3,8 +3,9 @@
 // It was written by leang27 <52003343+leang27@users.noreply.github.com>
 
 use iced::{
+    alignment::Vertical,
     widget::{Container, Row, Text},
-    Alignment, Element, Length,
+    Element, Length,
 };
 use iced_aw::number_input;
 
@@ -21,15 +22,16 @@ pub enum Message {
 
 fn main() -> iced::Result {
     iced::application(
-        "Number Input example",
+        NumberInputDemo::default,
         NumberInputDemo::update,
         NumberInputDemo::view,
     )
+    .title("Number Input example")
     .window_size(iced::Size {
         width: 250.0,
         height: 200.0,
     })
-    .font(iced_fonts::REQUIRED_FONT_BYTES)
+    .font(iced_aw::temp_fonts::REQUIRED_FONT_BYTES)
     .run()
 }
 
@@ -56,7 +58,7 @@ impl NumberInputDemo {
         Container::new(
             Row::new()
                 .spacing(10)
-                .align_y(Alignment::Center)
+                .align_y(Vertical::Center)
                 .push(lb_minute)
                 .push(txt_minute),
         )

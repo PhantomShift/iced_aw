@@ -2,19 +2,25 @@
 //
 // It was written by Kaiden42 <gitlab@tinysn.com>
 
+// Current issues with this example - manual call to `shell.request_redraw()`
+// is needed to update the rendering of the picker.
+// Cancel button doesn't seem to be working while submit does.
+
 use iced::{
+    alignment::Vertical,
     widget::{Button, Container, Row, Text},
-    Alignment, Element, Length,
+    Element, Length,
 };
 use iced_aw::{time_picker::Time, TimePicker};
 
 fn main() -> iced::Result {
     iced::application(
-        "TimePicker example",
+        TimePickerExample::default,
         TimePickerExample::update,
         TimePickerExample::view,
     )
-    .font(iced_fonts::REQUIRED_FONT_BYTES)
+    .title("TimePicker example")
+    .font(iced_aw::temp_fonts::REQUIRED_FONT_BYTES)
     .run()
 }
 
@@ -61,7 +67,7 @@ impl TimePickerExample {
         .use_24h();
 
         let row = Row::new()
-            .align_y(Alignment::Center)
+            .align_y(Vertical::Center)
             .spacing(10)
             .push(timepicker)
             .push(Text::new(format!("Time: {}", self.time)));

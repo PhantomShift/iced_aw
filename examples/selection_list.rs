@@ -2,6 +2,8 @@
 //
 // It was written by Héctor Ramón Jiménez <hector0193@gmail.com> and Andrew Wheeler <genusistimelord@gmail.com>
 
+// Current issues with this example - hovering from one item to another in the list does not highlight properly
+
 use iced::{
     widget::{button, Column, Container, Text},
     Alignment, Element, Font, Length,
@@ -9,8 +11,9 @@ use iced::{
 use iced_aw::{selection_list::SelectionList, style::selection_list::primary};
 
 pub fn main() -> iced::Result {
-    iced::application("Selection list example", Example::update, Example::view)
-        .font(iced_fonts::REQUIRED_FONT_BYTES)
+    iced::application(Example::default, Example::update, Example::view)
+        .title("Selection list example")
+        .font(iced_aw::temp_fonts::REQUIRED_FONT_BYTES)
         .run()
 }
 

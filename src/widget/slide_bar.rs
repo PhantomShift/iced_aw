@@ -165,17 +165,17 @@ where
         Node::new(size)
     }
 
-    fn on_event(
+    fn update(
         &mut self,
         tree: &mut Tree,
-        event: Event,
+        event: &Event,
         layout: Layout<'_>,
         cursor: mouse::Cursor,
         _renderer: &Renderer,
         _clipboard: &mut dyn Clipboard,
         shell: &mut Shell<'_, Message>,
         _viewport: &Rectangle,
-    ) -> event::Status {
+    ) {
         update(
             &event,
             layout,
@@ -187,7 +187,7 @@ where
             self.step,
             self.on_change.as_ref(),
             &self.on_release,
-        )
+        );
     }
 
     fn draw(
@@ -218,8 +218,7 @@ pub fn update<Message, T>(
     step: T,
     on_change: &dyn Fn(T) -> Message,
     on_release: &Option<Message>,
-) -> event::Status
-where
+) where
     T: Copy + Into<f64> + num_traits::FromPrimitive,
     Message: Clone,
 {
@@ -262,7 +261,7 @@ where
                 change(cursor_position);
                 state.is_dragging = true;
 
-                return event::Status::Captured;
+                shell.capture_event();
             }
         }
         Event::Mouse(mouse::Event::ButtonReleased(mouse::Button::Left))
@@ -273,7 +272,7 @@ where
                 }
                 state.is_dragging = false;
 
-                return event::Status::Captured;
+                shell.capture_event();
             }
         }
         Event::Mouse(mouse::Event::CursorMoved { .. })
@@ -281,13 +280,11 @@ where
             if is_dragging {
                 let _ = cursor.position().map(change);
 
-                return event::Status::Captured;
+                shell.capture_event();
             }
         }
         _ => {}
     }
-
-    event::Status::Ignored
 }
 
 /// Draws a [`SlideBar`].
@@ -326,6 +323,7 @@ pub fn draw<T, R, Message>(
     if bounds.intersects(viewport) {
         renderer.fill_quad(
             renderer::Quad {
+                snap: true,
                 bounds,
                 border: Border {
                     radius: slider.border_radius.into(),
@@ -341,6 +339,7 @@ pub fn draw<T, R, Message>(
     if active_progress_bounds.intersects(viewport) {
         renderer.fill_quad(
             renderer::Quad {
+                snap: true,
                 bounds: active_progress_bounds,
                 border: Border {
                     radius: slider.border_radius.into(),
